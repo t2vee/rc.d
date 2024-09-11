@@ -1,0 +1,48 @@
+#!/bin/sh
+
+# PROVIDE: frpc
+# REQUIRE: NETWORKING
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="frpc"
+rcvar="frpc_enable"
+
+frpc_cmd="/usr/local/bin/frpc"
+frpc_conf="/usr/local/etc/frp/frpc.toml"
+frpc_log="/var/log/frpc.log"
+
+# frpc user
+frpc_user="nobody"
+
+start_cmd="${name}_start"
+stop_cmd="${name}_stop"
+restart_cmd="${name}_restart"
+status_cmd="${name}_status"
+
+load_rc_config $name
+
+frpc_start() {
+    echo "Starting frpc..."
+    su -m "${frpc_user}" -c "${frpc_cmd} -c ${frpc_conf} > ${frpc_log} 2>&1 &"
+}
+
+frpc_stop() {
+    echo "Stopping frpc..."
+    pkill -f "${frpc_cmd}"
+}
+
+frpc_status() {
+    pgrep -f "${frpc_cmd}" > /dev/null && echo "frpc is running" || echo "frpc is not running"
+}
+
+frpc_restart() {
+    frpc_stop
+    sleep 1
+    frpc_start
+}
+
+: ${frpc_enable:="NO"}
+
+run_rc_command "$1"
