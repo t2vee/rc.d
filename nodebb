@@ -1,0 +1,47 @@
+#!/bin/sh
+
+# PROVIDE: nodebb
+# REQUIRE: NETWORKING
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="nodebb"
+rcvar="nodebb_enable"
+
+nodebb_dir="/usr/local/www/nodebb"
+nodebb_cmd="/usr/local/bin/node ${nodebb_dir}/nodebb"
+nodebb_log="/var/log/nodebb.log"
+
+# NodeBB user
+nodebb_user="nodebb"
+
+start_cmd="${name}_start"
+stop_cmd="${name}_stop"
+status_cmd="${name}_status"
+restart_cmd="${name}_restart"
+
+load_rc_config $name
+
+nodebb_start() {
+    echo "Starting NodeBB..."
+    su -m "${nodebb_user}" -c "cd ${nodebb_dir} && ${nodebb_cmd} start > ${nodebb_log} 2>&1 &"
+}
+
+nodebb_stop() {
+    echo "Stopping NodeBB..."
+    su -m "${nodebb_user}" -c "cd ${nodebb_dir} && ${nodebb_cmd} stop"
+}
+
+nodebb_restart() {
+    echo "Restarting NodeBB..."
+    su -m "${nodebb_user}" -c "cd ${nodebb_dir} && ${nodebb_cmd} restart"
+}
+
+nodebb_status() {
+    su -m "${nodebb_user}" -c "cd ${nodebb_dir} && ${nodebb_cmd} status"
+}
+
+: ${nodebb_enable:="NO"}
+
+run_rc_command "$1"
